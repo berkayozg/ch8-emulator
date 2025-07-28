@@ -1,9 +1,11 @@
 #pragma once
+
 #include <cstdint>
 
 class Chip8 {
 public:
     Chip8();
+
     void LoadROM(char const *filename);
 
     uint8_t registers[16]{};
@@ -17,4 +19,7 @@ public:
     uint8_t keypad[16]{};
     uint32_t video[64 * 32]{};
     uint16_t opcode;
+
+    std::default_random_engine randGen;
+    std::uniform_int_distribution<uint8_t> randByte;
 };
