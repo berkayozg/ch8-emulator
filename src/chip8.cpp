@@ -1,5 +1,6 @@
 #include "chip8.hpp"
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <random>
 
@@ -37,7 +38,7 @@ Chip8::Chip8()
     pc = START_ADDRESS;
 
     // Load fonts into memory
-    for (unsigned int i = 0; i < FONTSET_SIZE; i++) {
+    for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
         memory[FONTSET_START_ADDRESS + 1] = fontset[i];
     }
 }
@@ -57,11 +58,44 @@ void Chip8::LoadROM(char const *filename) {
         file.close();
 
         // Load the ROM contents into the Chip8's memory, starting at 0x200
-        for (long i = 0; i < size; i++) {
+        for (long i = 0; i < size; ++i) {
             memory[START_ADDRESS + i] = buffer[i];
         }
 
         // Free the buffer
         delete[] buffer;
+    }
+}
+
+/* Clears the screen by setting all of the screen bits to zero. */
+void Chip8::OP_00E0(void) {
+    memset(video, 0, sizeof(video));
+}
+
+void Chip8::OP_00EE(void) {
+    --sp;
+    pc = stack[sp];
+}
+
+void Chip8::OP_1nnn(void) {
+    uint16_t address = opcode & 0xFFFu;
+
+    pc = address;
+}
+
+void Chip8::OP_2nnn(void) {
+    uint16_t address = opcode & 0xFFFu;
+
+    stack[sp] = pc;
+    ++sp;
+    pc = address;
+}
+
+void Chip8::OP_3xkk(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t kk = opcode & 0x00FFu;
+
+    if (registers[Vx] == kk) {
+        pc += 2;
     }
 }
