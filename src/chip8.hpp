@@ -42,4 +42,9 @@ public:
     void OP_3xkk(void);  // Skip next instruction if Vx = kk
     void OP_4xkk(void);
     void OP_5xy0(void);
+    void OP_6xkk(void);
+    void OP_7xkk(void);
+    void OP_8xy0(void);
+    void OP_8xy1(void);
+    void OP_8xy2(void);
 };
