@@ -172,3 +172,42 @@ void Chip8::OP_8xy4(void) {
         registers[0xF] = 0;
     }
 }
+
+void Chip8::OP_8xy5(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+    if (registers[Vx] > registers[Vy]) {
+        registers[0xF] = 1;
+    } else {
+        registers[0xF] = 0;
+    }
+    registers[Vx] -= registers[Vy];
+}
+
+void Chip8::OP_8xy6(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    registers[0xF] = (registers[Vx] & 0x1u);
+    registers[Vx] >>= 1;
+}
+
+void Chip8::OP_8xy7(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+    if (registers[Vy] > registers[Vx]) {
+        registers[0xF] = 1;
+    } else {
+        registers[0xF] = 0;
+    }
+
+    registers[Vx] = registers[Vy] - registers[Vx];
+}
+
+void Chip8::OP_8xyE(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    registers[0xF] = (registers[Vx] & 0xFFu) >> 7u;
+    registers[Vx] <<= 1;
+}
