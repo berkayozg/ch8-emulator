@@ -53,4 +53,14 @@ public:
     void OP_8xy6(void);
     void OP_8xy7(void);
     void OP_8xyE(void);
+    void OP_9xy0(void);
+    void OP_Annn(void);
+    void OP_Bnnn(void);
+    void OP_Cxkk(void);
+    void OP_Dxyn(void);
+    void OP_Ex9E(void);
+    void OP_ExA1(void);
+    void OP_Fx07(void);
+    void OP_Fx0A(void);
+
 };

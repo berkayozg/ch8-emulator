@@ -4,6 +4,9 @@
 #include <fstream>
 #include <random>
 
+#define VIDEO_WIDTH 64
+#define VIDEO_HEIGHT 32
+
 const unsigned int START_ADDRESS = 0x200;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
 
@@ -210,4 +213,43 @@ void Chip8::OP_8xyE(void) {
 
     registers[0xF] = (registers[Vx] & 0xFFu) >> 7u;
     registers[Vx] <<= 1;
+}
+
+void Chip8::OP_9xy0(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+
+    if (registers[Vx] != registers[Vy]) {
+        pc += 2;
+    }
+}
+
+void Chip8::OP_Annn(void) {
+    uint16_t nnnValue = opcode & 0x0FFFu;
+
+    index = nnnValue;
+}
+
+void Chip8::OP_Bnnn(void) {
+    uint16_t nnnValue = opcode & 0x0FFFu;
+
+    pc = nnnValue + registers[0];
+}
+
+void Chip8::OP_Cxkk(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t kk = opcode & 0x00FFu;
+
+    registers[Vx] = randByte(randGen) & kk;
+}
+
+void Chip8::OP_Dxyn(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+    uint8_t height = opcode & 0x000Fu;
+
+    // making sure that it is in screen boundaries
+    uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
+    uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
+
 }
