@@ -252,4 +252,26 @@ void Chip8::OP_Dxyn(void) {
     uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
     uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
 
+    registers[0xF] = 0;
+
+    for (unsigned int row = 0; row < height; ++row) {
+        uint8_t spriteByte = memory[index + row];
+
+        for (uint8_t col = 0; col < 8; ++col) {
+            uint8_t spritePixel = spriteByte & (0x80u >> col);
+            uint32_t* screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+
+            // Sprite pixel is on
+            if (spritePixel) {
+                // Screen pixel also on - collision
+                if (*screenPixel == 0xFFFFFFFF) {
+                    registers[0xF] = 1;
+                }
+            
+                // XOR with the sprite pixel
+                *screenPixel ^= 0xFFFFFFFF;
+            }
+        }
+    }
+
 }
