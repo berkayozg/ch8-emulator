@@ -295,3 +295,13 @@ void Chip8::OP_ExA1(void) {
         pc += 2;
     }
 }
+
+void Chip8::OP_Fx07(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    registers[Vx] = delayTimer;
+}
+
+void Chip8::OP_Fx0A(void) {
+    
+}
