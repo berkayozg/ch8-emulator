@@ -259,7 +259,8 @@ void Chip8::OP_Dxyn(void) {
 
         for (uint8_t col = 0; col < 8; ++col) {
             uint8_t spritePixel = spriteByte & (0x80u >> col);
-            uint32_t* screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+            uint32_t *screenPixel =
+                &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
 
             // Sprite pixel is on
             if (spritePixel) {
@@ -267,13 +268,12 @@ void Chip8::OP_Dxyn(void) {
                 if (*screenPixel == 0xFFFFFFFF) {
                     registers[0xF] = 1;
                 }
-            
+
                 // XOR with the sprite pixel
                 *screenPixel ^= 0xFFFFFFFF;
             }
         }
     }
-
 }
 
 void Chip8::OP_Ex9E(void) {
@@ -303,5 +303,68 @@ void Chip8::OP_Fx07(void) {
 }
 
 void Chip8::OP_Fx0A(void) {
-    
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    for (uint8_t i = 0; i < 16; i++) {
+        if (keypad[i]) {
+            registers[Vx] = i;
+            return;
+        }
+    }
+    pc -= 2;
+}
+
+void Chip8::OP_Fx15(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    delayTimer = registers[Vx];
+}
+
+void Chip8::OP_Fx18(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    soundTimer = registers[Vx];
+}
+
+void Chip8::OP_Fx1E(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    index = registers[Vx] + index;
+}
+
+void Chip8::OP_Fx29(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    // Each character sprite is 5 bytes
+    index = FONTSET_START_ADDRESS + (registers[Vx] * 5);
+}
+
+void Chip8::OP_Fx33(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t value = registers[Vx];
+
+    // Hundreds digit
+    memory[index] = value / 100;
+
+    // Tens digit
+    memory[index + 1] = (value % 100) / 10;
+
+    // Ones digit
+    memory[index + 2] = value % 10;
+}
+
+void Chip8::OP_Fx55(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    for (uint8_t i = 0; i < Vx; i++) {
+        memory[index + i] = registers[i];
+    }
+}
+
+void Chip8::OP_Fx65(void) {
+    uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+
+    for (uint8_t i = 0; i < Vx; i++) {
+        registers[i] = memory[index + i];
+    }
 }

@@ -62,5 +62,11 @@ public:
     void OP_ExA1(void);
     void OP_Fx07(void);
     void OP_Fx0A(void);
-
+    void OP_Fx15(void);
+    void OP_Fx18(void);
+    void OP_Fx1E(void);
+    void OP_Fx29(void);
+    void OP_Fx33(void);
+    void OP_Fx55(void);
+    void OP_Fx65(void);
 };
