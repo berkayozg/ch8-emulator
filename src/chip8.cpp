@@ -44,6 +44,92 @@ Chip8::Chip8()
     for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
         memory[FONTSET_START_ADDRESS + 1] = fontset[i];
     }
+
+    // Default: all point to OP_NULL
+    for (auto &f : table) {
+        f = &Chip8::OP_NULL;
+    }
+
+    for (auto &f : table0) {
+        f = &Chip8::OP_NULL;
+    }
+
+    for (auto &f : table8) {
+        f = &Chip8::OP_NULL;
+    }
+
+    for (auto &f : tableE) {
+        f = &Chip8::OP_NULL;
+    }
+
+    for (auto &f : tableF) {
+        f = &Chip8::OP_NULL;
+    }
+
+    // Primary table dispatch by first nibble
+    table[0x0] = &Chip8::Table0;   // 00E0, 00EE
+    table[0x1] = &Chip8::OP_1nnn;  // JP addr
+    table[0x2] = &Chip8::OP_2nnn;  // CALL addr
+    table[0x3] = &Chip8::OP_3xkk;  // SE Vx, byte
+    table[0x4] = &Chip8::OP_4xkk;  // SNE Vx, byte
+    table[0x5] = &Chip8::OP_5xy0;  // SE Vx, Vy
+    table[0x6] = &Chip8::OP_6xkk;  // LD Vx, byte
+    table[0x7] = &Chip8::OP_7xkk;  // ADD Vx, byte
+    table[0x8] = &Chip8::Table8;   // 8xy*
+    table[0x9] = &Chip8::OP_9xy0;  // SNE Vx, Vy
+    table[0xA] = &Chip8::OP_Annn;  // LD I, addr
+    table[0xB] = &Chip8::OP_Bnnn;  // JP V0, addr
+    table[0xC] = &Chip8::OP_Cxkk;  // RND Vx, byte
+    table[0xD] = &Chip8::OP_Dxyn;  // DRW Vx, Vy, nibble
+    table[0xE] = &Chip8::TableE;   // Ex9E / ExA1
+    table[0xF] = &Chip8::TableF;   // Fx**
+
+    // Table0 0x0xxx family
+    table0[0x0] = &Chip8::OP_00E0;
+    table0[0xE] = &Chip8::OP_00EE;
+
+    // Table8 0x8xy family
+    table8[0x0] = &Chip8::OP_8xy0;
+    table8[0x1] = &Chip8::OP_8xy1;
+    table8[0x2] = &Chip8::OP_8xy2;
+    table8[0x3] = &Chip8::OP_8xy3;
+    table8[0x4] = &Chip8::OP_8xy4;
+    table8[0x5] = &Chip8::OP_8xy5;
+    table8[0x6] = &Chip8::OP_8xy6;
+    table8[0x7] = &Chip8::OP_8xy7;
+    table8[0xE] = &Chip8::OP_8xyE;
+
+    // TableE 0xEx** family
+    tableE[0xE] = &Chip8::OP_Ex9E;
+    tableE[0x1] = &Chip8::OP_ExA1;
+
+    // TableF 0xFx** family
+    tableF[0x07] = &Chip8::OP_Fx07;
+    tableF[0x0A] = &Chip8::OP_Fx0A;
+    tableF[0x15] = &Chip8::OP_Fx15;
+    tableF[0x18] = &Chip8::OP_Fx18;
+    tableF[0x1E] = &Chip8::OP_Fx1E;
+    tableF[0x29] = &Chip8::OP_Fx29;
+    tableF[0x33] = &Chip8::OP_Fx33;
+    tableF[0x55] = &Chip8::OP_Fx55;
+    tableF[0x65] = &Chip8::OP_Fx65;
+}
+
+/* Dispatcher functions */
+void Chip8::Table0(void) {
+    (this->*table0[opcode & 0x000Fu])();
+}
+
+void Chip8::Table8(void) {
+    (this->*table8[opcode & 0x000Fu])();
+}
+
+void Chip8::TableE(void) {
+    (this->*tableE[opcode & 0x000Fu])();
+}
+
+void Chip8::TableF(void) {
+    (this->*tableF[opcode & 0x00FFu])();
 }
 
 void Chip8::LoadROM(char const *filename) {
@@ -67,6 +153,27 @@ void Chip8::LoadROM(char const *filename) {
 
         // Free the buffer
         delete[] buffer;
+    }
+}
+
+void Chip8::Cycle() {
+    // Fetch
+    opcode = (memory[pc] << 8u) | memory[pc + 1];
+
+    // Increment the PC before we execute anything
+    pc += 2;
+
+    // Decode and Execute
+    ((*this).*(table[(opcode & 0xF000u) >> 12u]))();
+
+    // Decrement the delay timer if it's been set
+    if (delayTimer > 0) {
+        --delayTimer;
+    }
+
+    // Decrement the sound timer if it's been set
+    if (soundTimer > 0) {
+        --soundTimer;
     }
 }
 

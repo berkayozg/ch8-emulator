@@ -6,6 +6,8 @@ class Chip8 {
 public:
     Chip8();
 
+    using Chip8Func = void (Chip8::*)();
+
     // ROM
     void LoadROM(char const *filename);
 
@@ -69,4 +71,23 @@ public:
     void OP_Fx33(void);
     void OP_Fx55(void);
     void OP_Fx65(void);
+
+    // Table dispatchers
+    void Table0(void);
+    void Table8(void);
+    void TableE(void);
+    void TableF(void);
+
+    // Fallback for unimplemented ops
+    void OP_NULL(void);
+
+    // Program cycle
+    void Cycle(void);
+
+private:
+    Chip8Func table[0x10];   // For 1st nibble dispatch
+    Chip8Func table0[0x10];  // for 0x0
+    Chip8Func table8[0x10];  // for 0x8
+    Chip8Func tableE[0x10];  // for 0xE
+    Chip8Func tableF[0x66];  // for 0xF
 };
