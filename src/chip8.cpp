@@ -1,11 +1,4 @@
 #include "chip8.hpp"
-#include <chrono>
-#include <cstring>
-#include <fstream>
-#include <random>
-
-#define VIDEO_WIDTH 64
-#define VIDEO_HEIGHT 32
 
 const unsigned int START_ADDRESS = 0x200;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
@@ -156,7 +149,7 @@ void Chip8::LoadROM(char const *filename) {
     }
 }
 
-void Chip8::Cycle() {
+void Chip8::Cycle(void) {
     // Fetch
     opcode = (memory[pc] << 8u) | memory[pc + 1];
 
@@ -176,6 +169,8 @@ void Chip8::Cycle() {
         --soundTimer;
     }
 }
+
+void Chip8::OP_NULL(void) {}
 
 /* Clears the screen by setting all of the screen bits to zero. */
 void Chip8::OP_00E0(void) {
@@ -463,7 +458,7 @@ void Chip8::OP_Fx33(void) {
 void Chip8::OP_Fx55(void) {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    for (uint8_t i = 0; i < Vx; i++) {
+    for (uint8_t i = 0; i <= Vx; i++) {
         memory[index + i] = registers[i];
     }
 }
@@ -471,7 +466,7 @@ void Chip8::OP_Fx55(void) {
 void Chip8::OP_Fx65(void) {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    for (uint8_t i = 0; i < Vx; i++) {
+    for (uint8_t i = 0; i <= Vx; i++) {
         registers[i] = memory[index + i];
     }
 }

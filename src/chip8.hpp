@@ -1,6 +1,13 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
+#include <cstring>
+#include <fstream>
+#include <random>
+
+#define VIDEO_WIDTH 64
+#define VIDEO_HEIGHT 32
 
 class Chip8 {
 public:
